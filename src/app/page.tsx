@@ -5,6 +5,7 @@ import CategorySection from '@/components/CategorySection';
 import VodGrid from '@/components/VodGrid';
 import Link from 'next/link';
 
+export const runtime = 'edge';
 export const revalidate = 3600;
 
 export default async function Home({ searchParams }: { searchParams: Promise<{ [key: string]: string | undefined }> }) {

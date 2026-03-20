@@ -2,6 +2,8 @@ import { fetchVodData, VodItem } from '@/lib/api';
 import PlayerSection from '@/components/PlayerSection';
 import { notFound } from 'next/navigation';
 
+export const runtime = 'edge';
+
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   try {

@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
+export const runtime = 'edge';
+
 const API_BASE_URL = "http://caiji.dyttzyapi.com/api.php/provide/vod/";
 
 export async function GET(request: NextRequest) {

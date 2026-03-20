@@ -4,6 +4,7 @@ import { buildCategoryTree, findCatById, getCategoryTitle } from '@/lib/categori
 import VodGrid from '@/components/VodGrid';
 import { notFound } from 'next/navigation';
 
+export const runtime = 'edge';
 export const revalidate = 3600;
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {

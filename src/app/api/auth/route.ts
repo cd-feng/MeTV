@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 
+export const runtime = 'edge';
+
 /**
  * 密码验证 API
  * POST /api/auth
