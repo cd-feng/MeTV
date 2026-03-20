@@ -39,15 +39,17 @@ export default async function CategoryPage({
     : tree.find(c => c.id === id);
   const subCategories = mainCat?.sub ?? [];
 
-  // 实际请求的分类 ID：一级分类则自动用第一个子类，二级直接用自身
+  // 实际请求的分类 ID（维持前端路由逻辑）：一级分类则自动用第一个子类，二级直接用自身
   const activeSubId = isSub ? id : (subCategories[0]?.id ?? id);
+  // 全新跨站映射逻辑：提取对应的中文名称
+  const activeSubName = isSub ? item.type_name : (subCategories[0]?.name ?? item.type_name);
 
   let list: VodItem[] = [];
   let totalPage = 1;
   let errorMsg = '';
 
   try {
-    const data = await fetchVodData({ ac: 'detail', t: activeSubId, pg });
+    const data = await fetchVodData({ ac: 'detail', catName: activeSubName, pg });
     list = data.list || [];
     totalPage = data.pagecount || 1;
   } catch {

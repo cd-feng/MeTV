@@ -34,14 +34,16 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ [
   const dramasCat  = tree.find(c => c.name.includes('剧') || c.name.includes('连续'));
   const animeCat   = tree.find(c => c.name.includes('动漫') || c.name.includes('动画'));
 
-  // 找每类的第一个子分类 ID（如 动作片、国产剧、国产动漫）
+  // 找每类的第一个子分类 ID（如 动作片、国产剧、国产动漫）用于跳转链接
   const firstSubId = (cat: typeof movieCat) => cat?.sub[0]?.id;
+  // 找每类的第一个子分类 Name（如 动作片、国产剧、国产动漫）用于智能查询代理
+  const firstSubName = (cat: typeof movieCat) => cat?.sub[0]?.name;
 
   const [latestData, movieData, dramaData, animeData] = await Promise.allSettled([
     fetchVodData({ ac: 'detail', h: '24', pg: '1' }),  // 最近更新（轮播数据源）
-    fetchVodData({ ac: 'detail', t: firstSubId(movieCat) || '6',   pg: '1' }),
-    fetchVodData({ ac: 'detail', t: firstSubId(dramasCat) || '13', pg: '1' }),
-    fetchVodData({ ac: 'detail', t: firstSubId(animeCat) || '29',  pg: '1' }),
+    fetchVodData({ ac: 'detail', catName: firstSubName(movieCat) || '动作片', pg: '1' }),
+    fetchVodData({ ac: 'detail', catName: firstSubName(dramasCat) || '国产剧', pg: '1' }),
+    fetchVodData({ ac: 'detail', catName: firstSubName(animeCat) || '国产动漫', pg: '1' }),
   ]);
 
   const latest: VodItem[] = latestData.status === 'fulfilled' ? latestData.value.list || [] : [];
