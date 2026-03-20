@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import HlsPlayer from './HlsPlayer';
+import HorizontalScroll from './HorizontalScroll';
 
 interface Episode {
   title: string;
@@ -54,7 +55,7 @@ export default function PlayerSection({ sources }: { sources: SourceData[] }) {
             <div className="section-header" style={{ marginBottom: '1rem' }}>
               <h3 className="section-title" style={{ fontSize: '1.1rem' }}>播放源</h3>
             </div>
-            <div className="source-tabs-scroll">
+            <HorizontalScroll className="source-tabs-scroll">
               {sources.map((src, idx) => (
                 <button
                   key={src.sourceKey}
@@ -71,7 +72,7 @@ export default function PlayerSection({ sources }: { sources: SourceData[] }) {
                   {src.sourceName}
                 </button>
               ))}
-            </div>
+            </HorizontalScroll>
           </div>
         )}
 
