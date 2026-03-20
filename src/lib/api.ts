@@ -34,6 +34,35 @@ export interface CatItem {
 const globalAppCache = new Map<string, { time: number; data: any }>();
 const CACHE_TTL_MS = 5 * 60 * 1000; // 5分钟有效
 
+const globalMappingCache = { time: 0, mapping: {} as Record<string, Record<string, number>> };
+const MAPPING_TTL = 12 * 3600 * 1000; // 12小时
+
+export async function getCategoryMapping() {
+  const now = Date.now();
+  if (now - globalMappingCache.time < MAPPING_TTL && Object.keys(globalMappingCache.mapping).length > 0) {
+    return globalMappingCache.mapping;
+  }
+
+  const mapping: Record<string, Record<string, number>> = {};
+  const promises = Object.entries(config).map(async ([key, conf]) => {
+    try {
+      const res = await fetch(`${conf.api}?ac=list`, { next: { revalidate: 43200 } });
+      const data = await res.json();
+      mapping[key] = {};
+      (data.class || []).forEach((c: any) => {
+        mapping[key][c.type_name] = c.type_id;
+      });
+    } catch {
+      mapping[key] = {};
+    }
+  });
+
+  await Promise.allSettled(promises);
+  globalMappingCache.time = now;
+  globalMappingCache.mapping = mapping;
+  return mapping;
+}
+
 export async function fetchVodData(params: Record<string, string>) {
   // === 1. 尝试使用极速内存缓存 ===
   const cacheKey = 'VOD::' + JSON.stringify(params);
@@ -43,27 +72,47 @@ export async function fetchVodData(params: Record<string, string>) {
     return cached.data;
   }
 
+  // === 2. 解析 catName 进行真实跨源 ID 映射 ===
+  let catMapping: Record<string, Record<string, number>> | null = null;
+  if (params.catName) {
+    catMapping = await getCategoryMapping();
+  }
+
   const isDynamic = !!params.wd || !!params.ids || !!params.h;
   const fetchOptions: RequestInit = isDynamic
     ? { cache: "no-store" }
     : { next: { revalidate: 3600 } };
 
   const promises = Object.entries(config).map(async ([sourceKey, sourceConfig]) => {
+    // 拦截转换 catName: 查找该源专属的数字 ID
+    let injectedTypeId: string | undefined;
+    if (params.catName && catMapping) {
+      const mappedId = catMapping[sourceKey]?.[params.catName];
+      if (!mappedId) {
+        // 白名单过滤：如果这个采集站压根儿没有“动作片”分类，那我们直接静默跳过它，不用再发多余的网络请求去添堵
+        return { sourceKey, sourceName: sourceConfig.name, data: { list: [] } };
+      }
+      injectedTypeId = String(mappedId);
+    }
+
     try {
       const targetUrl = new URL(sourceConfig.api);
       for (const [key, value] of Object.entries(params)) {
-        if (value) targetUrl.searchParams.set(key, value);
+        if (key !== 'catName' && value) targetUrl.searchParams.set(key, value);
       }
-      
+      if (injectedTypeId) {
+        targetUrl.searchParams.set('t', injectedTypeId);
+      }
+
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 5000);
-      
+
       const res = await fetch(targetUrl.toString(), {
         ...fetchOptions,
         signal: controller.signal
       });
       clearTimeout(timeoutId);
-      
+
       const textRaw = await res.text();
       let data;
       try {
@@ -129,24 +178,77 @@ export async function fetchVodData(params: Record<string, string>) {
   });
 
   const finalResult = { list: mergedList, pagecount: maxPageCount };
-  
+
   // 写入缓存
   globalAppCache.set(cacheKey, { time: Date.now(), data: finalResult });
-  
+
   return finalResult;
 }
 
-/** 获取全部分类列表，数据缓存12小时 */
+// ---- 统一分类合并器 ----
+let unifiedCatsCache: { time: number; data: CatItem[] } = { time: 0, data: [] };
+
 export async function fetchCategories(): Promise<CatItem[]> {
-  const mainApi = config["dyttzy"].api;
-  const url = `${mainApi}?ac=list`;
-  try {
-    const res = await fetch(url, { next: { revalidate: 43200 } });
-    if (!res.ok) throw new Error(`Status ${res.status}`);
-    const data = await res.json();
-    return data.class || [];
-  } catch (e) {
-    console.error("Failed to fetch categories:", e);
-    return [];
+  const now = Date.now();
+  if (now - unifiedCatsCache.time < 3600 * 1000 * 12 && unifiedCatsCache.data.length > 0) {
+    return unifiedCatsCache.data;
   }
+
+  const promises = Object.entries(config).map(async ([key, conf]) => {
+    try {
+      const res = await fetch(`${conf.api}?ac=list`, { next: { revalidate: 43200 } });
+      const data = await res.json();
+      return { key, classes: (data.class || []) as CatItem[] };
+    } catch {
+      return null;
+    }
+  });
+
+  const results = await Promise.allSettled(promises);
+  const validResults = results
+    .map(r => r.status === 'fulfilled' ? r.value : null)
+    .filter((r): r is { key: string; classes: CatItem[] } => r !== null && r.classes.length > 0);
+
+  const baseResult = validResults.find(r => r.key === 'dyttzy') || validResults[0];
+  if (!baseResult) return [];
+
+  // 以核心站为基准框架
+  const unified: CatItem[] = [...baseResult.classes];
+  let nextFakeId = 10000;
+
+  for (const res of validResults) {
+    if (res.key === baseResult.key) continue;
+
+    for (const cat of res.classes) {
+      // 通过全名称完全一致判重
+      if (unified.some(u => u.type_name === cat.type_name)) continue;
+
+      if (cat.type_pid !== 0) {
+        // 查找这个子分类在原本站点的父分类名
+        const parentName = res.classes.find(c => c.type_id === cat.type_pid)?.type_name || '';
+
+        // 智能分类归属算法（解决烂站没有标准的父分类）
+        let keyword = '';
+        if (parentName.includes('电影') || cat.type_name.includes('片') || cat.type_name.includes('电影')) keyword = '电影';
+        else if (parentName.includes('剧') || parentName.includes('连续')) keyword = '剧';
+        else if (parentName.includes('动漫') || parentName.includes('动画')) keyword = '动漫';
+        else if (parentName.includes('综艺')) keyword = '综艺';
+
+        if (keyword) {
+          // 找到我们基准框架里的那个“根节点”
+          const unifiedParent = unified.find(u => u.type_pid === 0 && (u.type_name.includes(keyword) || u.type_name.includes(keyword[0])));
+          if (unifiedParent) {
+            unified.push({
+              type_id: nextFakeId++,
+              type_pid: unifiedParent.type_id,
+              type_name: cat.type_name
+            });
+          }
+        }
+      }
+    }
+  }
+
+  unifiedCatsCache = { time: now, data: unified };
+  return unified;
 }
