@@ -37,53 +37,74 @@ install.sh               # Linux 一键部署脚本
 uninstall.sh             # Linux 卸载脚本
 ```
 
-## 环境要求
+## 快速开始
+
+### 环境要求
 
 - Node.js 20+
 - npm 10+
 
-## 本地开发
+### 本地开发运行
 
 ```bash
+# 1. 安装依赖
 npm install
+
+# 2. 启动本地开发服务器
 npm run dev
 ```
 
 访问 `http://localhost:3000`。
 
-如需测试访问密码功能：
+**如需测试访问密码功能：**
 
 ```bash
 ACCESS_PASSWORD=123456 npm run dev
 ```
 
-## 生产构建
+## 部署指南
+
+### 方式一：Cloudflare Pages 部署 (推荐)
+
+本项目原生支持部署到 Cloudflare Pages 环境，利用 Edge Runtime 实现高性能的全站边缘加速。
+
+**1. 初次部署步骤**
+
+- 登录 Cloudflare 控制台，进入 **Workers & Pages** -> **Create application** -> **Pages** -> **Connect to Git**。
+- 授权关联你的 GitHub/GitLab 仓库，并选择当前项目。
+- 配置构建设置 (Build settings)：
+  - **Framework preset**: `Next.js`
+  - **Build command**: `npx @cloudflare/next-on-pages@1`
+  - **Build output directory**: `.vercel/output/static`
+- 点击 **Save and Deploy** 即可开始部署。
+
+**2. 开启 Node.js 兼容性标志（必做项）**
+为防止 Worker 运行时由于内部依赖 Node 原生模块（如 `node:buffer`）而报错白屏，必须开启兼容性标志：
+
+- 在 Cloudflare Pages 此项目页面中，进入 **Settings (设置)** -> **Functions (函数)**。
+- 找到下方的 **Compatibility flags (兼容性标志)** 配置区。
+- 针对生产环境 (Production) 和预览环境 (Preview)，添加一条新的配置：`nodejs_compat`。
+- 保存修改，并回到部署列表点击 **重新部署 (Retry Deployment)** 使配置完全生效。
+
+### 方式二：Docker 部署
+
+本项目提供 Dockerfile，使用 Next.js 的 `standalone` 输出模式，镜像体积小、启动快。
+
+**1. 打包/构建 Docker 镜像**
 
 ```bash
-npm install
-npm run build
-npm run start -- --hostname 0.0.0.0 --port 3000
-```
-
-## Docker 部署
-
-本项目支持 Docker 镜像打包与容器化部署，Dockerfile 使用 Next.js `standalone` 输出模式，镜像体积小、启动快。
-
-### 构建镜像
-
-```bash
+# 在项目根目录下执行打包镜像命令
 docker build -t metv:latest .
 ```
 
-### 运行容器
+**2. 运行 Docker 容器**
 
 ```bash
 docker run -d --name metv -p 28301:3000 --restart unless-stopped suxuefeng20/metv:latest
 ```
 
-### 启用访问密码
-
-通过环境变量 `ACCESS_PASSWORD` 设置访问密码，不设置则免密访问：
+**3. 启用访问密码运行**
+如需设置独立的访问密码，可以通过环境变量 `ACCESS_PASSWORD` 传递：
 
 ```bash
 docker run -d --name metv \
@@ -93,81 +114,9 @@ docker run -d --name metv \
   suxuefeng20/metv:latest
 ```
 
-访问 `http://<服务器IP>:28301`。
+运行后即可通过 `http://<服务器IP>:28301` 访问。
 
-## Linux 一键部署（systemd）
+## 备注及进阶配置
 
-项目提供 `install.sh` 和 `uninstall.sh` 脚本。
-
-### 安装部署
-
-```bash
-chmod +x install.sh uninstall.sh
-sudo ./install.sh
-```
-
-默认行为：
-
-- 安装依赖（`npm ci`）
-- 构建项目（`npm run build`）
-- 创建 systemd 服务文件 `/etc/systemd/system/metv.service`
-- 立即启动服务
-- 不自动开机启动
-
-### 服务管理
-
-```bash
-sudo systemctl start metv      # 启动
-sudo systemctl restart metv    # 重启
-sudo systemctl stop metv       # 停止
-sudo systemctl status metv     # 查看状态
-```
-
-### 查看日志
-
-```bash
-sudo journalctl -u metv -f
-```
-
-### 自定义部署参数
-
-```bash
-sudo ./install.sh \
-  --service-name metv \
-  --service-user www-data \
-  --app-dir /opt/MeTV \
-  --port 3000
-```
-
-支持参数：
-
-| 参数 | 默认值 | 说明 |
-|------|--------|------|
-| `--service-name` | `metv` | 服务名称 |
-| `--service-user` | 当前用户 | 运行用户 |
-| `--app-dir` | 脚本所在目录 | 应用目录 |
-| `--port` | `3000` | 监听端口 |
-
-## 卸载
-
-```bash
-sudo ./uninstall.sh
-```
-
-默认行为：
-
-- 停止并禁用服务
-- 删除 `/etc/systemd/system/metv.service`
-- 重载 systemd
-- 保留项目文件不删除
-
-指定服务名称卸载：
-
-```bash
-sudo ./uninstall.sh --service-name metv
-```
-
-## 备注
-
-- 数据源 API 配置在 `src/lib/api.ts` 和 `src/app/api/vod/route.ts` 中。
-- 如通过 Nginx 或 Caddy 反向代理，将流量转发至 `127.0.0.1:<端口>` 即可。
+- **数据源修改**：API 配置规则位于 `src/lib/api.ts` 和 `src/app/api/vod/route.ts` 中。
+- **反向代理部署**：如果你使用 Nginx 或 Caddy 进行反向代理，只需将该域名的流量转发至本地监听的对应端口（如本文档中的 `127.0.0.1:3000` 或 Docker 映射的 `28301`）即可。
