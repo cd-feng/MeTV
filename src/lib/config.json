@@ -4,36 +4,6 @@
     "name": "电影天堂资源",
     "detail": "http://caiji.dyttzyapi.com"
   },
-  "ruyi": {
-    "api": "http://cj.rycjapi.com/api.php/provide/vod",
-    "name": "如意资源",
-    "detail": "http://cj.rycjapi.com"
-  },
-  "bfzy": {
-    "api": "https://bfzyapi.com/api.php/provide/vod",
-    "name": "暴风资源",
-    "detail": "https://bfzyapi.com"
-  },
-  "tyyszy": {
-    "api": "https://tyyszy.com/api.php/provide/vod",
-    "name": "天涯资源",
-    "detail": "https://tyyszy.com"
-  },
-  "zy360": {
-    "api": "https://360zy.com/api.php/provide/vod",
-    "name": "360资源",
-    "detail": "https://360zy.com"
-  },
-  "maotaizy": {
-    "api": "https://caiji.maotaizy.cc/api.php/provide/vod",
-    "name": "茅台资源",
-    "detail": "https://caiji.maotaizy.cc"
-  },
-  "wolong": {
-    "api": "https://wolongzyw.com/api.php/provide/vod",
-    "name": "卧龙资源",
-    "detail": "https://wolongzyw.com"
-  },
   "mdzy": {
     "api": "https://www.mdzyapi.com/api.php/provide/vod",
     "name": "魔都资源",
@@ -43,10 +13,5 @@
     "api": "https://api.zuidapi.com/api.php/provide/vod",
     "name": "最大资源",
     "detail": "https://api.zuidapi.com"
-  },
-  "wujin": {
-    "api": "https://api.wujinapi.me/api.php/provide/vod",
-    "name": "无尽资源",
-    "detail": "https://api.wujinapi.me"
   }
 }

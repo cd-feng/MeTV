@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { fetchVodData, fetchCategories, VodItem } from '@/lib/api';
 import { buildCategoryTree, findCatById, getCategoryTitle } from '@/lib/categories';
 import VodGrid from '@/components/VodGrid';
+import HorizontalScroll from '@/components/HorizontalScroll';
 import { notFound } from 'next/navigation';
 
 export const runtime = 'edge';
@@ -64,7 +65,7 @@ export default async function CategoryPage({
     <>
       {/* 子分类 Tabs */}
       {subCategories.length > 0 && (
-        <div className="category-tabs">
+        <HorizontalScroll className="category-tabs">
           {subCategories.map((s) => (
             <Link key={s.id} href={`/category/${s.id}`}>
               <span className={`cat-tab${activeSubId === s.id ? ' active' : ''}`}>
@@ -72,7 +73,7 @@ export default async function CategoryPage({
               </span>
             </Link>
           ))}
-        </div>
+        </HorizontalScroll>
       )}
 
       <div className="page-content">

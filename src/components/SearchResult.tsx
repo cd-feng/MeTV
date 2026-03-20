@@ -4,6 +4,7 @@ import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import VodGrid from './VodGrid';
 import { VodItem } from '@/lib/api';
+import HorizontalScroll from './HorizontalScroll';
 
 export default function SearchResult({ wd, pg, list }: { wd: string; pg: string; list: VodItem[] }) {
   const [sourceFilter, setSourceFilter] = useState<string>('');
@@ -32,7 +33,7 @@ export default function SearchResult({ wd, pg, list }: { wd: string; pg: string;
       </div>
 
       {availableSources.length > 0 && (
-        <div className="source-tabs-scroll" style={{ marginBottom: '1.5rem' }}>
+        <HorizontalScroll className="source-tabs-scroll" style={{ marginBottom: '1.5rem' }}>
           <button
             onClick={() => setSourceFilter('')}
             className={`seg-btn${!sourceFilter ? ' active' : ''}`}
@@ -50,7 +51,7 @@ export default function SearchResult({ wd, pg, list }: { wd: string; pg: string;
               {src.name}
             </button>
           ))}
-        </div>
+        </HorizontalScroll>
       )}
 
       {filteredList.length === 0
