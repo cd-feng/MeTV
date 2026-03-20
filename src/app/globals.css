@@ -604,6 +604,22 @@ a { color: inherit; text-decoration: none; }
   border-color: var(--primary);
 }
 
+/* ===== 多源选项卡横向滚动区 ===== */
+.source-tabs-scroll {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  padding-bottom: 0.25rem;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.source-tabs-scroll::-webkit-scrollbar {
+  display: none;
+}
+.source-tabs-scroll > * {
+  flex-shrink: 0;
+}
+
 /* ===== 响应式 ===== */
 @media (max-width: 768px) {
   .navbar {
@@ -823,7 +839,7 @@ a { color: inherit; text-decoration: none; }
 /* ===== 3D 堆叠轮播 ===== */
 .hc-wrap {
   position: relative;
-  height: 420px;
+  height: 520px;
   overflow: hidden;
   perspective: 1200px;
   background: #0a0a0c;
@@ -862,7 +878,7 @@ a { color: inherit; text-decoration: none; }
 /* 单张卡片 */
 .hc-card {
   position: absolute;
-  width: 220px;
+  width: 280px;
   border-radius: 14px;
   overflow: hidden;
   transition:
@@ -885,7 +901,7 @@ a { color: inherit; text-decoration: none; }
   left: 110%;
   top: 50%;
   transform: translateY(-50%);
-  width: 320px;
+  width: 400px;
   color: #fff;
   display: flex;
   flex-direction: column;
@@ -1035,8 +1051,8 @@ a { color: inherit; text-decoration: none; }
 @media (max-width: 640px) {
   .theme-label { display: none; }
   /* 轮播移动端：适配小屏 */
-  .hc-wrap { height: 240px; }
-  .hc-card { width: 130px; border-radius: 10px; }
+  .hc-wrap { height: 320px; }
+  .hc-card { width: 170px; border-radius: 10px; }
   .hc-info { display: none; }
   .hc-arrow {
     width: 36px;

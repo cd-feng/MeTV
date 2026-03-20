@@ -67,7 +67,7 @@ export default function CategorySection({ title, catId, initialLatest, maxItems 
         /* shelf-row：6列固定宽度行 */
         <div className="shelf-row">
           {displayed.map(item => (
-            <Link href={`/detail/${item.vod_id}`} key={item.vod_id} className="vod-card">
+            <Link href={`/detail/${encodeURIComponent(item.vod_name || '')}`} key={item.vod_id || item.vod_name} className="vod-card">
               <div className="vod-poster-wrap">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
@@ -75,6 +75,7 @@ export default function CategorySection({ title, catId, initialLatest, maxItems 
                   alt={item.vod_name}
                   className="vod-poster"
                   loading="lazy"
+                  onError={(e) => { e.currentTarget.src = 'https://placehold.co/300x450/333/555?text=暂无封面'; }}
                 />
                 {item.vod_remarks && (
                   <span className={`vod-badge${item.vod_remarks.includes('全') ? '' : ' hot'}`}>

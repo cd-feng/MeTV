@@ -3,6 +3,7 @@ import { buildCategoryTree } from '@/lib/categories';
 import HeroCarousel from '@/components/HeroCarousel';
 import CategorySection from '@/components/CategorySection';
 import VodGrid from '@/components/VodGrid';
+import SearchResult from '@/components/SearchResult';
 import Link from 'next/link';
 
 export const runtime = 'edge';
@@ -21,22 +22,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ [
       list = data.list || [];
     } catch { /* ignore */ }
 
-    return (
-      <div className="page-content">
-        <div className="section-header">
-          <h1 className="section-title">搜索：{wd}</h1>
-        </div>
-        {list.length === 0
-          ? <div className="empty-state"><span>🎬</span><p>未找到相关影视资源</p></div>
-          : <VodGrid list={list} />
-        }
-        <div className="pagination">
-          {parseInt(pg) > 1 && <Link href={`/?wd=${wd}&pg=${parseInt(pg) - 1}`}><button className="page-btn">« 上一页</button></Link>}
-          <button className="page-btn active">第 {pg} 页</button>
-          <Link href={`/?wd=${wd}&pg=${parseInt(pg) + 1}`}><button className="page-btn">下一页 »</button></Link>
-        </div>
-      </div>
-    );
+    return <SearchResult wd={wd} pg={pg} list={list} />;
   }
 
   // ---- 首页并发拉取数据 ----

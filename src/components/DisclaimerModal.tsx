@@ -28,7 +28,7 @@ export default function DisclaimerModal() {
         <h2 className="disclaimer-title">免责声明</h2>
         <div className="disclaimer-body">
           <p>
-            本站所有影视资源均来源于第三方资源站（电影天堂），本站不存储、不制作任何视频内容。
+            本站所有影视资源均来源于第三方各开源API影视采集站，本站不存储、不制作任何视频内容。
           </p>
           <p>
             所有内容仅供学习与交流使用，请在观看后 24 小时内删除。如有侵权，请联系我们删除相关内容。
