@@ -49,7 +49,7 @@ export default async function RootLayout({
           </nav>
           <main>{children}</main>
           <footer className="footer">
-            &copy; {new Date().getFullYear()} MeTV &nbsp;·&nbsp; 数据来源：电影天堂
+            &copy; {new Date().getFullYear()} MeTV &nbsp;·&nbsp; 数据来源：全站多源聚合
           </footer>
         </ThemeProvider>
       </body>

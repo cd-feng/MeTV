@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
@@ -50,8 +50,8 @@ export default function HeroCarousel({ items }: { items: VodItem[] }) {
           if (Math.abs(d) > VISIBLE) return null;
 
           const isCenter = d === 0;
-          const scale = isCenter ? 1 : Math.pow(0.78, Math.abs(d));
-          const tx = d * 52;
+          const scale = isCenter ? 1.05 : Math.pow(0.75, Math.abs(d));
+          const tx = d * 60;
           const rY = d * -20;
           const z = 100 - Math.abs(d) * 30;
           const opacity = isCenter ? 1 : 0.55 - Math.abs(d) * 0.1;
@@ -59,7 +59,7 @@ export default function HeroCarousel({ items }: { items: VodItem[] }) {
 
           const handleCardClick = () => {
             if (isCenter) {
-              router.push(`/detail/${item.vod_id}`);
+              router.push(`/detail/${encodeURIComponent(item.vod_name || '')}`);
               return;
             }
             setActive(i);
@@ -67,7 +67,7 @@ export default function HeroCarousel({ items }: { items: VodItem[] }) {
 
           return (
             <div
-              key={item.vod_id}
+              key={item.vod_id || item.vod_name}
               className={`hc-card${isCenter ? ' hc-center' : ''}`}
               style={{
                 transform: `translateX(${tx}%) scale(${scale}) rotateY(${rY}deg)`,
@@ -89,10 +89,11 @@ export default function HeroCarousel({ items }: { items: VodItem[] }) {
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src={item.vod_pic}
+                src={item.vod_pic || 'https://placehold.co/800x450/333/555?text=暂无封面'}
                 alt={item.vod_name}
                 className="hc-poster"
                 draggable={false}
+                onError={(e) => { e.currentTarget.src = 'https://placehold.co/800x450/333/555?text=暂无封面'; }}
               />
 
               {isCenter && (
@@ -105,7 +106,7 @@ export default function HeroCarousel({ items }: { items: VodItem[] }) {
                     {(item.vod_blurb || '').length > 80 ? '...' : ''}
                   </p>
                   <Link
-                    href={`/detail/${item.vod_id}`}
+                    href={`/detail/${encodeURIComponent(item.vod_name || '')}`}
                     className="hc-play-btn"
                     onClick={(e) => e.stopPropagation()}
                   >
