@@ -33,8 +33,6 @@ src/
   components/            # UI 组件
   lib/                   # 数据请求与分类工具函数
 public/                  # 静态资源
-install.sh               # Linux 一键部署脚本
-uninstall.sh             # Linux 卸载脚本
 ```
 
 ## 快速开始
