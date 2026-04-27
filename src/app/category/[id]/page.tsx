@@ -5,7 +5,7 @@ import VodGrid from '@/components/VodGrid';
 import HorizontalScroll from '@/components/HorizontalScroll';
 import { notFound } from 'next/navigation';
 
-export const runtime = 'edge';
+// 使用 Node.js Runtime，确保内存缓存生效
 export const revalidate = 3600;
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { fetchVodData } from "@/lib/api";
 
-export const runtime = 'edge';
+// 使用 Node.js Runtime (非 edge)，使 api.ts 中的内存缓存（Map）能真正跨请求持久化
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);

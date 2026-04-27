@@ -3,7 +3,7 @@ import PlayerSection from '@/components/PlayerSection';
 import DetailPoster from '@/components/DetailPoster';
 import { notFound } from 'next/navigation';
 
-export const runtime = 'edge';
+// 使用 Node.js Runtime (非 edge)，确保内存缓存在详情页请求时同样生效
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;

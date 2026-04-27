@@ -32,7 +32,7 @@ export interface CatItem {
 
 // ---- 全局内存缓存加速器 ----
 const globalAppCache = new Map<string, { time: number; data: any }>();
-const CACHE_TTL_MS = 5 * 60 * 1000; // 5分钟有效
+const CACHE_TTL_MS = 30 * 60 * 1000; // 30分钟有效，影视数据变动不频繁，延长缓存减少对采集站压力
 
 const globalMappingCache = { time: 0, mapping: {} as Record<string, Record<string, number>> };
 const MAPPING_TTL = 12 * 3600 * 1000; // 12小时
